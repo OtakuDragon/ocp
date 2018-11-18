@@ -1,16 +1,14 @@
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.*;
+import java.nio.file.attribute.*;
 import java.sql.SQLException;
-import java.util.ResourceBundle;
-import java.util.Scanner;
-import java.util.StringTokenizer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Set;
 
 public class OCP {
 
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         /*
         Assertions
 
@@ -204,16 +202,217 @@ public class OCP {
         bundleName_pt_BR.properties
         bundleName_pt.properties
         bundleName.properties
+       -----------------------------------------------------------------------------------
+        IO/NIO
 
+        File
 
+        Todos os métodos abaixo retornam boolean com o resultado
+        e o createNewFile joga IOException.
+
+        renameTo também funciona como move e não existe método para mover.
+
+        File dir = new File("dir1/dir2");
+        File file = new File("dir1/dir2","file.txt");
+
+        dir.mkdirs();
+
+        try {
+            file.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        file.delete();
+        file.renameTo(new File("dir1/dir2","file2.txt"));
+        file.renameTo(new File("dir1","file.txt"));//Move para o dir1 o mesmo arquivo
+        file.exists();
+        file.isFile();
+        file.isDirectory();
+        String[] dirs = dir.list();//tipo ls em um diretório
+
+        FileReader
+
+        FileReader fileReader = new FileReader(file);//Ou com a string "dir1/dir2/file.txt" construtor joga FileNotFoundException
+        //lê char a char e retorna -1 no fim do arquivo
+        int read = fileReader.read(); //Joga IOException
+        //Lê os chars para um char array.
+        char[] conteudo = new char[256];
+        fileReader.read(conteudo);//Joga IOException
+        fileReader.close();//é AutoCloseable, Joga IOException
+
+        FileWriter
+
+        //Todos os métodos de FileWriter e o construtor abaixo jogam IOException
+        FileWriter fileWriter = new FileWriter(file, Boolean.TRUE);//Segundo parametro "append" opcional, também funciona com a String do file
+
+        fileWriter.append("aaa");
+        fileWriter.write(new char[]{'a', 'a', 'a'});
+        fileWriter.flush();//Envia tudo que está cacheado em buffer para dentro do arquivo.
+        fileWriter.close();//É AutoCloseable
+
+        BufferedReader
+
+        //Funciona como wrapper de FileReader para ler linhas inteiras do arquivo
+        BufferedReader bufferedReader = new BufferedReader(fileReader);//Segundo parametro opcional tipo int que é o tamanho do buffer
+        String line = bufferedReader.readLine();//joga IOException
+        bufferedReader.close();//É AutoCloseable, joga IOException
+
+        BufferedWriter
+
+        BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+        //Todos os métodos jogam IOException
+        bufferedWriter.write("text");
+        bufferedWriter.append("text");
+        bufferedWriter.newLine();
+        bufferedWriter.flush();
+        bufferedWriter.close();//é AutoCLoseable
+
+        PrintWriter
+
+        //O construtor joga FileNotFoundException, os métodos não jogam checked exception.
+        PrintWriter printWriter = new PrintWriter(file);//Funciona com File, String(da File), OutputStream e Writer
+        printWriter.printf("%d%s",1,"2");//ou format
+        printWriter.println();
+        printWriter.print("aaaa");
+        printWriter.append("aaa");//mesmo que print
+        printWriter.println("aaaa");
+        printWriter.flush();
+        printWriter.close();
+        printWriter.checkError();//True se aconteceu alguma exceção
+
+        Path/Paths/Files(NIO.2)
+
+        Path dir = Paths.get("dir1/dir2");
+
+        Path file = Paths.get("dir1/dir2","file.txt");
+        file.toFile().toPath();
+        file.normalize();//remove ..'s se possível
+        file.relativize(other);//Constroi um caminho relativo entre file e other
+        file.resolve(other);//Tenta fazer um join de other com file
+
+        //Jogam IOException
+        Files.createDirectories(dir);
+        Files.createFile(file);
+        Files.copy(pathSource, pathTarget);
+        Files.move(pathSource, pathTarget);
+        Files.delete(path);//Joga exceção se o arquivo ou diretório não existe
+        Files.deleteIfExists(path);//Não joga exceção se o arquivo ou diretório não existe
+        //Não joga IOException
+        Files.exists(path);
+
+        File Attributes
+
+        Files.getLastModifiedTime(file);//Throws IOException
+        Files.setLastModifiedTime(file, FileTime.fromMillis(1000L));//Throws IOException
+        Files.isReadable(file);
+        Files.isExecutable(file);
+        Files.isExecutable(file);
+
+        BasicFileAttributes basicFileAttributes = Files.readAttributes(file, BasicFileAttributes.class);//Throws IOException
+        basicFileAttributes.creationTime();
+        basicFileAttributes.isDirectory();
+        basicFileAttributes.lastAccessTime();
+        basicFileAttributes.lastModifiedTime();
+        basicFileAttributes.size();
+        BasicFileAttributeView basicFileAttributeView = Files.getFileAttributeView(file, BasicFileAttributeView.class);
+        //lastModifiedTime, lastAcessTime, createTime
+        basicFileAttributeView.setTimes(FileTime.fromMillis(1000L), FileTime.fromMillis(1000L), FileTime.fromMillis(1000L));//Throws IOException
+
+        DosFileAttributes dosFileAttributes = Files.readAttributes(file, DosFileAttributes.class);//Throws IOException
+        dosFileAttributes.isArchive();
+        dosFileAttributes.isHidden();
+        dosFileAttributes.isReadOnly();
+        dosFileAttributes.isSystem();
+
+        DosFileAttributeView dosFileAttributeView = Files.getFileAttributeView(file, DosFileAttributeView.class);
+
+        dosFileAttributeView.setArchive(boolean);//Throws IOException
+        dosFileAttributeView.setHidden(boolean);//Throws IOException
+        dosFileAttributeView.setReadOnly(boolean);//Throws IOException
+        dosFileAttributeView.setSystem(boolean);//Throws IOException
+
+        PosixFileAttributes posixFileAttributes = Files.readAttributes(file, PosixFileAttributes.class);//Throws IOException
+        GroupPrincipal group = posixFileAttributes.group();
+        UserPrincipal owner = posixFileAttributes.owner();
+        Set<PosixFilePermission> permissions = posixFileAttributes.permissions();
+
+        PosixFileAttributeView posixFileAttributeView = Files.getFileAttributeView(file, PosixFileAttributeView.class);
+
+        posixFileAttributeView.setGroup(someGroupPrincipal);//Throws IOException
+        posixFileAttributeView.setPermissions(PosixFilePermissions.fromString("rrrxxxxxx"));//Throws IOException
+        posixFileAttributeView.setOwner(someUserPrincipal);//Throws IOException
+
+        DirectoryStream
+
+        DirectoryStream não é recursivo, se tiver uma pasta dentro do diretório ele só
+        vai recuperar o Path da pasta, não dos conteúdos dela.
+
+        DirectoryStream<Path> directoryStream = directoryStream = Files.newDirectoryStream(Paths.get(""));//Throws IOException, Path "" = pasta atual.
+        for (Path directChild: directoryStream) {
+            System.out.println(directChild);
+        }
+
+        FileVisitor
+
+        Para arquivos e pasta em um mesmo nível não é possível garantir a ordem em que
+        cada arquivo ou pasta será visitado.
+
+        FileVisitor<Path> fileVisitor = new FileVisitor<>() {
+            @Override
+            public FileVisitResult preVisitDirectory(Object dir, BasicFileAttributes attrs) throws IOException {
+                return  FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFile(Object file, BasicFileAttributes attrs) throws IOException {
+                return  FileVisitResult.SKIP_SIBLINGS;
+            }
+
+            @Override
+            public FileVisitResult visitFileFailed(Object file, IOException exc) throws IOException {
+                return FileVisitResult.SKIP_SUBTREE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Object dir, IOException exc) throws IOException {
+                return FileVisitResult.TERMINATE;
+            }
+        };
+
+        Files.walkFileTree(file, fileVisitor);//Throws IOException
+
+        PatchMatcher
+
+        PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher(gobPattern);
+        boolean matchResult = pathMatcher.matches(file);
+
+        Gob
+        *.java Matches a path that represents a file name ending in .java
+        *.* Matches file names containing a dot
+        *.{java,class} Matches file names ending with .java or .class
+        foo.? Matches file names starting with foo. and a single character extension
+        ** match qualquer coisa com file boundary
+
+        WatchService
+
+        WatchService não é recursivo ele não pega os eventos dentro de pastas dentro da pasta.
+
+        WatchService watchService = FileSystems.getDefault().newWatchService();//Throws IOException
+        WatchKey watchKey = Paths.get("").register(watchService, StandardWatchEventKinds.ENTRY_CREATE);//Throws IOException
+
+        Path dir = Paths.get("dir1/dir2");
+        Files.createDirectories(dir);
+        Path file = Paths.get("dir1/dir2","file.txt");
+        Files.createFile(file);
+        for (WatchEvent<?> watchEvent: watchKey.pollEvents()) {
+            System.out.println(watchEvent.context());//O Path criado nesse caso
+            System.out.println(watchEvent.count());//1
+            System.out.println(watchEvent.kind());//StandardWatchEventKinds.ENTRY_CREATE
+        }
 
 
 
         */
-        ResourceBundle resourceBundle = ResourceBundle.getBundle("bundleName", locale);
-        resourceBundle.getString("key");
-
-
 
 
 

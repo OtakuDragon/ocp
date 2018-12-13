@@ -1,15 +1,12 @@
-import java.io.*;
-import java.nio.file.*;
-import java.nio.file.attribute.*;
+import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 public class OCP {
 
 
-
-    public static void main(String[] args) throws IOException {
-        /*
+       /*
         Assertions
 
         java [-ea[:package|class] | -enableassertions[:package|class]
@@ -168,7 +165,7 @@ public class OCP {
 
         Formatting
 
-        %[index][flags][width][.precision]conversionChar
+        %[index$][flags][width][.precision]conversionChar
 
         Conversion Chars
 
@@ -410,37 +407,48 @@ public class OCP {
             System.out.println(watchEvent.kind());//StandardWatchEventKinds.ENTRY_CREATE
         }
 
+        Generics
 
+        List<? extends Shape> extendsShape = new ArrayList<>();
+        List<Shape> shape = new ArrayList<>();
+
+        //Proibido
+        //Em uma referencia de wildcard não é permitido inserir ou remover.
+        shape = extendsShape;
+        extendsShape.addAll(shape);
+        extendsShape.addAll(extendsShape);
+        extendsShape.remove(1);//unsupported operation
+
+        //Aceitavel
+        //List<Shape> IS A List<? extends Shape>
+        extendsShape = shape;
+        shape.addAll(extendsShape);
 
         */
+       static class Shape{}
+
+    public static void main(String[] args) throws IOException, SQLException {
+        List<? extends Shape> extendsShape = new ArrayList<>();
+        List<Shape> shape = new ArrayList<>();
+
+        //Proibido
+        //Em uma referencia de wildcard não é permitido inserir ou remover.
+        shape = extendsShape;
+        extendsShape.addAll(shape);
+        extendsShape.addAll(extendsShape);
+        extendsShape.remove(1);//unsupported operation
+
+        //Aceitavel
+        //List<Shape> IS A List<? extends Shape>
+        extendsShape = shape;
+        shape.addAll(extendsShape);
+
 
 
 
     }
 
-    public static boolean method() throws IOException, SQLException{throw new IOException();}
 
-    private static class A implements AutoCloseable {
-
-        public A() throws IOException {
-
-        }
-
-        @Override
-        public void close() throws IOException {
-            throw new IOException("c");
-        }
-    }
-
-    private static class B implements AutoCloseable {
-
-        public B() {
-        }
-
-        @Override
-        public void close() {
-            System.out.println("closed b ");
-        }
-    }
 
 }
+

@@ -1,7 +1,13 @@
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
+import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.RecursiveTask;
 
 public class OCP {
 
@@ -409,8 +415,20 @@ public class OCP {
 
         Generics
 
-        List<? extends Shape> extendsShape = new ArrayList<>();
         List<Shape> shape = new ArrayList<>();
+
+        Pode escrever e ler Shape ou suas subclasses(IS A Shape)
+
+        List<? extends Shape> extendsShape = new ArrayList<>();
+
+        Não permite a escrita de nenhum tipo, e pode ler o tipo Shape
+
+        List<? super Shape> superShape = new ArrayList<>();
+
+        Pode ler o tipo Object e pode escrever Shape ou suas subclasses(IS A Shape)
+
+        List<Shape> IS A List<? extends Shape>
+        List<Shape> IS A List<? super Shape>
 
         //Proibido
         //Em uma referencia de wildcard não é permitido inserir ou remover.
@@ -420,33 +438,33 @@ public class OCP {
         extendsShape.remove(1);//unsupported operation
 
         //Aceitavel
-        //List<Shape> IS A List<? extends Shape>
         extendsShape = shape;
+        superShape = shape;
         shape.addAll(extendsShape);
+        superShape.addAll(extendsShape);
+        superShape.addAll(shape);
 
         */
-       static class Shape{}
+
+    static class ShapeParent{}
+
+     static class Shape extends ShapeParent{}
+
+     static class ShapeSon extends Shape{}
+
+
+
 
     public static void main(String[] args) throws IOException, SQLException {
-        List<? extends Shape> extendsShape = new ArrayList<>();
-        List<Shape> shape = new ArrayList<>();
-
-        //Proibido
-        //Em uma referencia de wildcard não é permitido inserir ou remover.
-        shape = extendsShape;
-        extendsShape.addAll(shape);
-        extendsShape.addAll(extendsShape);
-        extendsShape.remove(1);//unsupported operation
-
-        //Aceitavel
-        //List<Shape> IS A List<? extends Shape>
-        extendsShape = shape;
-        shape.addAll(extendsShape);
-
-
-
-
+//        Path p1 = Paths.get("c:\\personal\\.\\photos\\..\\readme.txt");
+//        Path p2 = Paths.get("c:\\personal\\index.html");
+        Path p1 = Paths.get("/personal/./photos/../readme.txt");
+        Path p2 = Paths.get("/personal/index.html");
+        Path p3 = p1.relativize(p2);
+        System.out.println(p3);
     }
+
+
 
 
 

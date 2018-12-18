@@ -2,12 +2,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.CallableStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.RecursiveTask;
+import java.util.regex.Pattern;
 
 public class OCP {
 
@@ -183,13 +185,16 @@ public class OCP {
 
         Flags
 
-        - - Left justify
+        - - Left justify(Right padding)(width obrigatório)
         + - Sinal do número + ou -
-        0 - 0 padding
+        0 - 0 padding(width obrigatório)
         , - Formatar número com pontos e virgulas de acordo com o locale
         ( - Coloca numero negativo entre parenteses
+        < - Referência o termo que está posicionado à esquerda
 
          System.out.format("%+0,(40.3f", -123456.78910d);
+
+         -0 = combinação inválida de flags.
 
         Resource bundles
 
@@ -456,12 +461,8 @@ public class OCP {
 
 
     public static void main(String[] args) throws IOException, SQLException {
-//        Path p1 = Paths.get("c:\\personal\\.\\photos\\..\\readme.txt");
-//        Path p2 = Paths.get("c:\\personal\\index.html");
-        Path p1 = Paths.get("/personal/./photos/../readme.txt");
-        Path p2 = Paths.get("/personal/index.html");
-        Path p3 = p1.relativize(p2);
-        System.out.println(p3);
+
+        System.out.printf("%0-10f ", 1.000d);
     }
 
 

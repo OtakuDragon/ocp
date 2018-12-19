@@ -1,11 +1,19 @@
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Scanner;
 import java.util.TreeMap;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.RecursiveTask;
@@ -449,6 +457,28 @@ public class OCP {
         superShape.addAll(extendsShape);
         superShape.addAll(shape);
 
+        String comparator order
+
+        "" - EMPTY
+        " " - SPACE
+        "978" - NUMBERS
+        "A" - UPPERCASE
+        "a" - LOWERCASE
+
+        Prioridade overload
+
+        Integer Prioridade
+        Integer(exact)
+        int(unbox)
+        long(widening)
+        int...(vararg)
+
+        int Prioridade
+        int(exact)
+        long(widening)
+        Integer(boxing)
+        int...(vararg)
+
         */
 
     static class ShapeParent{}
@@ -458,16 +488,49 @@ public class OCP {
      static class ShapeSon extends Shape{}
 
 
+    public synchronized static void main(String[] args) throws IOException, SQLException, InterruptedException {
+       //compare string
+        Scanner s = new Scanner("obooo:and:foo");
+        s.useDelimiter("o");
 
 
-    public static void main(String[] args) throws IOException, SQLException {
+        while(s.hasNext()){
+            System.out.println(s.next());
+        }
 
-        System.out.printf("%0-10f ", 1.000d);
+        System.out.printf("%+s %1$s %<s", "a", "b");
+
+        List<String> strings = Arrays.asList("A", "a", "978", "", " ");
+        strings.wait();
+        Collections.sort(strings);
+
+
+        FileSystems.getDefault().getPathMatcher("glob:*.java");
+        WatchService watchService = FileSystems.getDefault().newWatchService();
+        Paths.get("").register(watchService, StandardWatchEventKinds.ENTRY_CREATE);
+        WatchKey take = watchService.take();
+        take.isValid();
     }
 
+}
 
+class TestClass{
+    //void probe(int... x) { System.out.println("In ..."); }  //1
 
+    void probe(Integer x) { System.out.println("In Integer"); } //2
 
+    //void probe(long x) { System.out.println("In long"); }//3
 
+    void probe(Long x) { System.out.println("In LONG"); } //4
+
+    void probe(int x) { System.out.println("In LONG"); } //4
+
+    public static void main(String[] args){
+        /*
+
+        */
+        Integer a = 0;
+        new TestClass().probe(a);
+    }
 }
 

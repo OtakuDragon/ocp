@@ -479,6 +479,141 @@ public class OCP {
         Integer(boxing)
         int...(vararg)
 
+        Anotações
+
+        == Format ==
+
+        DateFormat styles DEFAULT, FULL, LONG, MEDIUM, and SHORT
+
+        static DateFormat getDateInstance(int style, Locale aLocale)
+
+        %<s joga uma exceção quando tem apenas um paramêtro
+
+        %s will print any object using its toString() method.
+
+        String elements, the natural order is: space < upper case < lower case
+
+        word boundary(\\b) is not a whitespace(\\s)
+
+        The default precision of %f is 6, %b when not boolean is not null true else false
+
+        Scanner não tem construtor com String, nem com delimitador, o método de delimitador é s.useDelimiter
+
+        O locale de NumberFormat e DateFormat só pode ser definido no momento da construção
+
+        regex 0 ou mais, para um character que da match com 0 m.group() retorna uma String vazia
+
+        Calendar.getInstance() tem uma versão sem parametros, uma só com Locale e uma com timezone e Locale
+
+        scanner.hasNextXXX só olha o proximo token, não procura na String inteira
+
+        para %s o width define o padding e o .precision define o numero de caracteres da string
+        ex: out.printf("%20.1s", "aaa") imprime "a" e 19 espaços a esquerda com a flag %-20.1 seriam 19 espacos a direita
+
+        == IO ==
+
+        path.getName(int) é 0-based(indexed)
+
+        SimpleFileVisitor.visitFile(Path) caminho completo do arquivo
+
+        . = current directory .. = parent directory
+
+        relativize se um dos paths tiver root(for absoluto) e o outro não, joga IllegalArgumentException
+
+        relativize() e resolve() não normalizam seus paths ou seja .. e . contam como diretorios do calculo
+
+        DOS readonly, hidden, system,archive, POSIX permissions,group,owner
+
+        path.resolveSibling(String) cria um path com o valor da String no mesmo diretório de path
+
+        Files.newBufferedWriter java.lang.IllegalArgumentException: APPEND + TRUNCATE_EXISTING not allowed
+
+        Files.newBufferedReader() throws NoSuchFileException
+
+        BufferedWriter nao tem metodo writeUTF()
+
+        == Class Design ==
+
+        Em uma referencia de superclasse é possível que tenha subclasse em classes não relacionadas a compilação falha
+
+        Private means private to the class and not to the object
+
+        private dentro de non-static inner class é acessivel para a outer class
+
+        uma subclasse não pode ver um membro protected de uma referencia da superclasse super.protectedMember
+
+        variables are SHADOWED and methods are OVERRIDDEN.
+
+        If the equals() method returns true, then hashCode() for both the objects must return the same value. Não necessariamente considerando todos os atributos comparados em equals
+
+        em uma classe que não sobreescreve hashCode()(comportamento padrão) dois objetos que são ==(mesmo objeto) retornam o mesmo hashCode()
+
+        instanceof não compila se os tipos de não forem compativeis
+
+        quando o catch e o finally jogam excecao em um try normal a excecao jogada é a do finally a do catch é ignorada
+
+        variavels declaradas em um try with resources são final
+
+        A ordem dos cases no switch não importa, todas as comparaçoes são feitas
+
+        referenciar uma variavel ambigua causa erro de compilacao independente do modificador final
+
+        == Threads ==
+
+        interrupt() se a Thread estiver em wait(), sleep(), join() metodos que jogam InterruptedException é jogada uma Interrupted exception, se não a flag de isInterrupted é setada
+
+        WatchService poll() pega a WatchKey imediatamente ou após um delay e take() espera pela próxima WatchKey, uma WatchKey tem uma lista de WatchEvents
+
+        RecursiveTask<T> retorna um objeto do tipo T tanto para no método compute() para processamento sincrono como join() para processamento assíncrono
+
+        avoid deadlock get locks in same order
+
+        AtomicInteger, Long, Boolean todos os métodos que mudam são duas operaçoes, compareAndGet, getAndSet...
+
+        RecursiveAction(sem retorno) e RecursiveTask(com retorno) são classes abstratas
+
+        lock.lock() retorna void e lock.tryLock() retorna boolean
+
+        yield() é static
+
+        == Generics ==
+
+        Overload de método que recebe parametro generico não aceita Object, outros tipos sim
+
+        in a List<?> you can't add anything but can get objects with type Object
+
+        list.addAll(new ArrayList<>()) não compila
+
+        Um parametro de tipo generico é considerado como tipo ? extends Object, da pra chamar os metodos de Object nele
+
+        == Collections ==
+
+        Binary search returns index of the search key, if it is contained in the list; otherwise, (-(insertion point) - 1)
+
+        Deque, offer/add poll/remove, add to the end and remove from the front, push pop add to the front and remove from the front, there is no pushFirst or Last mas para os metodos de Queue existem versoes first e last
+
+        map.put() retorna o value substituido para uma key on null se o mapa ainda nao tinha aquela key
+
+        NavigableSet
+
+        higher - higher (greater)
+        ceiling - higher or equal
+
+        lower - lower (smaller)
+        floor - lower or equal
+
+        LinkedList is a Queue
+
+        == JDBC ==
+
+        A JDBC API implementation must support Entry Level SQL92 plus the SQL command Drop Table
+
+        ResultSet tem metodos getXXX para leitura e updateXXX para escrita, e nao tem setXXX
+
+        CachedRowset.acceptChanges() executa as alteracoes feitas ao rowset no banco de dados
+
+        JdbcRowSet e CachedRowSet implemetam Joinable e tem uma match column em um JoinRowSet cada rowset tem sua matchcolumn e o valor de todas tem que bater com as outras para aparecerem registros
+
         */
 
     static class ShapeParent{}

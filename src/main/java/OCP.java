@@ -1,22 +1,43 @@
+import javax.sql.rowset.RowSetProvider;
+import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystems;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
+import java.util.NavigableSet;
 import java.util.Scanner;
 import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.RecursiveTask;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 
 public class OCP {
@@ -510,6 +531,14 @@ public class OCP {
         para %s o width define o padding e o .precision define o numero de caracteres da string
         ex: out.printf("%20.1s", "aaa") imprime "a" e 19 espaços a esquerda com a flag %-20.1 seriam 19 espacos a direita
 
+        Locale myLocale = new Locale("ru", "RU"); You don't have to worry about the actual values of the language and country codes. Just remember that both are two lettered codes and country codes are always upper case.
+
+        Entre dois delimitadores em sequência é considerado que existe um token ""(empty string)
+
+        Default delimiters i.e. " \t\n\r\f" will be used to tokenize the string, qualquer combinação deles em sequência conta como um delimitador ex: \t\t\t\ n\n \t\r é um delimitador
+
+        MissingResourceException * if no resource bundle for the specified base name can be found
+
         == IO ==
 
         path.getName(int) é 0-based(indexed)
@@ -522,7 +551,9 @@ public class OCP {
 
         relativize() e resolve() não normalizam seus paths ou seja .. e . contam como diretorios do calculo
 
-        DOS readonly, hidden, system,archive, POSIX permissions,group,owner
+        relativize é como chegar em um caminho atráves de outro de forma relativa, caso exista um arquivo no caminho você "sai" do arquivo com .. como se fosse um diretório.
+
+        BASIC, size, creationTime, lastAccessTime, lastModifiedTime, isDirectory, isOther, isRegularFile, isSymbolicLink  DOS readonly, hidden, system,archive, POSIX permissions,group,owner
 
         path.resolveSibling(String) cria um path com o valor da String no mesmo diretório de path
 
@@ -531,6 +562,26 @@ public class OCP {
         Files.newBufferedReader() throws NoSuchFileException
 
         BufferedWriter nao tem metodo writeUTF()
+
+        path.getFileName() retorna um objeto path só com a parte final do caminho o ultimo diretório ou o nome do arquivo do path.
+
+        WatchKey valid states Ready, Signaled
+
+        StandardWatchEventKinds.OVERFLOW não precisa registrar para receber, ENTRY_DELETE, ENTRY_CREATE count() sempre 1, ENTRY_MODIFY count() 1 ou mais.
+
+        Files.setAttribute(path, "dos:hidden", true);
+
+        Para copy() e move() o comportamento padrão é jogar uma exceção se o Path(arquivo ou diretório) target já existir.
+
+        BufferedWriter br = Files.newBufferedWriter(myPath, Charset.forName("UTF-8"), new OpenOption[]{StandardOpenOption.APPEND, StandardOpenOption.DSYNC}); ASYNC = File content e metadata síncronizados DSYNC = File content síncronizado e metadata dessincronizado
+
+        Files.newBufferedWriter StandardOpenOption.READ = java.lang.IllegalArgumentException: READ not allowed
+
+        D in DSYNC is for data
+
+        READ and TRUNCATE_EXISTING (or WRITE, APPEND, or DELETE_ON_CLOSE, CREATE, CREATE_NEW, SYNC, DSYNC) cannot go together.
+
+        RandomAccessFile(File/String file, String mode) throws FileNotFoundException, modes r, rw, rws(SYNC), rwd(DSYNC)
 
         == Class Design ==
 
@@ -554,15 +605,49 @@ public class OCP {
 
         variavels declaradas em um try with resources são final
 
+        em um try with resources se o construtor ou o método close() declarar que joga alguma checked exception,
+        elas devem ser tradatas em catch ou throws, senão não compila.
+
         A ordem dos cases no switch não importa, todas as comparaçoes são feitas
 
         referenciar uma variavel ambigua causa erro de compilacao independente do modificador final
+
+        the overriding declaration must have a throws clause that is compatible with ALL the overridden declarations, or no throws declaration
+
+        protected is less restrictive than package access, A class can only have either public or no access modifier
+
+        you cannot access a non-final static field from an enum's constructor.
+
+        OuterClass.this e InnerClass.this em uma non-static inner class são declarações válidas InnerClass.this é o mesmo que this
+
+        Automatic variable = method local, inner class dentro de método static também é static
+
+        volatile não é um lock, é só uma instrução para que threads não guardem o valor da váriavel em cache, e sempre leiam da memória RAM.
+
+        java [ -enableassertions | -ea ] [:<package name>"..." | :<class name> ] With no arguments, the switch enables assertions by default. With one argument ending in "...", assertions are enabled in the specified package and any subpackages by default. If the argument is simply "...", assertions are enabled in the unnamed package in the current working directory. With one argument not ending in "...", assertions are enabled in the specified class
+
+        Non-static inner classes não podem ter membros static, só se forem primitivos e final.
+
+        When a programmer does not define ANY constructor, the compiler inserts one automatically, the access modifier of which is same as that of the class
+
+        constructors and initializers are not invoked during deserialization
+
+        Evaluation always left to right
+
+        FileInputStream, FileOutputStream, and RandomAccessFile do have a getChannel()
+
+        Uma classe Serializable com superclasses não Serializable pode ser serializada só que as variaveis os inicializadores e construtores das superclasses
+        serão chamados(elas são serão serializadas) e se alguma das superclasses não possuir um construtor sem  argumentos a desserialização falha.
+
+        An enum cannot be defined inside any method or constructor.
 
         == Threads ==
 
         interrupt() se a Thread estiver em wait(), sleep(), join() metodos que jogam InterruptedException é jogada uma Interrupted exception, se não a flag de isInterrupted é setada
 
         WatchService poll() pega a WatchKey imediatamente ou após um delay e take() espera pela próxima WatchKey, uma WatchKey tem uma lista de WatchEvents
+
+        poll() tem um overload que recebe um long e um TimeUnit e não tem uma apenas com long.
 
         RecursiveTask<T> retorna um objeto do tipo T tanto para no método compute() para processamento sincrono como join() para processamento assíncrono
 
@@ -575,6 +660,14 @@ public class OCP {
         lock.lock() retorna void e lock.tryLock() retorna boolean
 
         yield() é static
+
+        Concept to note here is that calling notify/notifyAll does not release the lock. A lock is not released until the thread exits a synchronized block or method.
+
+        Thread.sleep() does not release the lock
+
+        chamar thread.setDaemon(boolean) depois de thread.start() causa uma IllegalThreadStateException
+
+        Lock.lock() chamado multiplas vezes não joga exceção, chamar unlock() mais vezes do que foi chamado lock() joga java.lang.IllegalMonitorStateException
 
         == Generics ==
 
@@ -604,6 +697,18 @@ public class OCP {
 
         LinkedList is a Queue
 
+        ConcurrentMap It is a Map providing additional atomic putIfAbsent, remove, and replace methods. todos esses métodos recebem chave e valor.
+
+        NavigableMap<K,V> tailMap(K key, boolean inclusive) , submapa do mapa original ligado ao mapa original apenas com elementos maior ou igual a key(depende do boolean)
+
+        CopyOnWriteArrayList.addAll() é atomico(sincronizado com Lock)
+
+        CopyOnWriteArrayList is List, not a ArrayList
+
+        Inserting null key or null value in a ConcurrentHashMap will throw a NullPointerException
+
+        Collections.sort() e Arrays.sort() jogam NullPointerException quando ordenando coleções/arrays de tipos wrappers
+
         == JDBC ==
 
         A JDBC API implementation must support Entry Level SQL92 plus the SQL command Drop Table
@@ -614,6 +719,17 @@ public class OCP {
 
         JdbcRowSet e CachedRowSet implemetam Joinable e tem uma match column em um JoinRowSet cada rowset tem sua matchcolumn e o valor de todas tem que bater com as outras para aparecerem registros
 
+        setAutoCommit(true) or even setAutoCommit(false), se mudar o valor atual da conexão causa um commit
+
+        Predicate boolean evaluate(RowSet rs) - chamado para cada movimentação do cursor(next(), previous()...) do rowset passando o rowset atual com o cursor posicionado para validação da linha atual de acordo com a condição do predicate.
+
+        PreparedStatement has specific methods for additional SQL column type such as setBlob(int parameterIndex, Blob x) and setClob(int parameterIndex, Clob x).
+
+        RowSet extends ResultSet
+
+        resultSet.getMetaData() retorna ResultSetMetadata que tem vários métodos que recebem o int do indice da coluna e dá informações sobre a coluna
+        e tem o getColumnCount().
+
         */
 
     static class ShapeParent{}
@@ -622,29 +738,97 @@ public class OCP {
 
      static class ShapeSon extends Shape{}
 
+     private static class MyAutoCloseable implements  AutoCloseable{
 
-    public synchronized static void main(String[] args) throws IOException, SQLException, InterruptedException {
-       //compare string
-        Scanner s = new Scanner("obooo:and:foo");
-        s.useDelimiter("o");
+        public MyAutoCloseable() throws NoSuchFileException {
 
-
-        while(s.hasNext()){
-            System.out.println(s.next());
         }
 
-        System.out.printf("%+s %1$s %<s", "a", "b");
+        public void someMethod() throws Exception{
 
-        List<String> strings = Arrays.asList("A", "a", "978", "", " ");
-        strings.wait();
-        Collections.sort(strings);
+        }
+
+         @Override
+         public void close() throws CloneNotSupportedException {
+             System.out.println("funfou");
+         }
 
 
-        FileSystems.getDefault().getPathMatcher("glob:*.java");
+     }
+
+
+    public synchronized static void main(String[] args) throws IOException, CloneNotSupportedException, InterruptedException, SQLException {
+        ReentrantLock rlock = new ReentrantLock();
+        boolean f1 = rlock.tryLock();
+        System.out.println(f1);
+        boolean f2 = rlock.tryLock();
+        System.out.println(f2);
+
+
+        String[] sa = { "charlie", "bob", "andy", "dave" };
+        Collections.sort(Arrays.asList(sa), null);
+        System.out.println(sa[0]);
+
+
+        System.out.println(FileSystems.getDefault().getPathMatcher("glob:[a-]").matches(Paths.get("a-")));
+
+        System.out.println(DateFormat.getDateInstance(DateFormat.DEFAULT, new Locale("UI", "ux")).format(new Date()));
+
+;
+
+
+        //Files.newBufferedWriter(Paths.get("a.txt"), Charset.defaultCharset(), StandardOpenOption.APPEND);
+
+//        Files.walkFileTree(Paths.get(""), new FileVisitor<Path>(){
+//            @Override
+//            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+//
+//                return null;
+//            }
+//
+//            @Override
+//            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+//                return null;
+//            }
+//
+//            @Override
+//            public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+//                return null;
+//            }
+//
+//            @Override
+//            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+//                return null;
+//            }
+//        });
+
+        try(MyAutoCloseable ac = new MyAutoCloseable()){
+
+        }finally {
+            System.out.println("aaa");
+        }
+
+
+        PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher("glob:*.java");
         WatchService watchService = FileSystems.getDefault().newWatchService();
+        DirectoryStream<Path> paths = Files.newDirectoryStream(Paths.get(""));
         Paths.get("").register(watchService, StandardWatchEventKinds.ENTRY_CREATE);
-        WatchKey take = watchService.take();
-        take.isValid();
+//        WatchKey watchKey = watchService.poll();
+//        WatchEvent<?> watchEvent = watchKey.pollEvents().get(0);
+//
+//        watchKey.isValid();
+
+
+        String a = "c";
+
+        switch (a){
+            case "a":
+                System.out.println("a");
+            case "b":
+                System.out.println("b");
+        }
+
+
     }
 
 }

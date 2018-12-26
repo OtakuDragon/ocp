@@ -10,13 +10,21 @@ static DateFormat getDateInstance(int style, Locale aLocale)
 
 %s will print any object using its toString() method.
 
-String elements, the natural order is: space < upper case < lower case
+String comparator order
+
+"" - EMPTY
+" " - SPACE
+"978" - NUMBERS
+"A" - UPPERCASE
+"a" - LOWERCASE
 
 word boundary(\\b) is not a whitespace(\\s)
 
-The default precision of %f is 6, %b when not boolean is not null true else false
+The default precision of %f is 6
 
-Scanner não tem construtor com String, nem com delimitador, o método de delimitador é s.useDelimiter
+%b when not boolean and is not null true else false
+
+Scanner tem construtor com String, e não tem com delimitador, o método de delimitador é s.useDelimiter()
 
 O locale de NumberFormat e DateFormat só pode ser definido no momento da construção
 
@@ -29,17 +37,21 @@ scanner.hasNextXXX só olha o proximo token, não procura na String inteira
 para %s o width define o padding e o .precision define o numero de caracteres da string
 ex: out.printf("%20.1s", "aaa") imprime "a" e 19 espaços a esquerda com a flag %-20.1 seriam 19 espacos a direita
 
-Locale myLocale = new Locale("ru", "RU"); You don't have to worry about the actual values of the language and country codes. Just remember that both are two lettered codes and country codes are always upper case.
+Locale myLocale = new Locale("ru", "RU"); both are two lettered codes and country codes are always upper case.
 
 Entre dois delimitadores em sequência é considerado que existe um token ""(empty string)
 
 Default delimiters i.e. " \t\n\r\f" will be used to tokenize the string, qualquer combinação deles em sequência conta como um delimitador ex: \t\t\t\ n\n \t\r é um delimitador
 
-MissingResourceException * if no resource bundle for the specified base name can be found
+MissingResourceException, if no resource bundle for the specified base name can be found
 
 =============== IO ===============
 
 path.getName(int) é 0-based(indexed)
+
+path.getRoot() retorna o root ou null se for um caminho relativo
+
+path.subPath(int, int) retorna uma parte do path o segundo int não é incluido
 
 SimpleFileVisitor.visitFile(Path) caminho completo do arquivo
 
@@ -51,7 +63,7 @@ relativize() e resolve() não normalizam seus paths ou seja .. e . contam como d
 
 relativize é como chegar em um caminho atráves de outro de forma relativa, caso exista um arquivo no caminho você "sai" do arquivo com .. como se fosse um diretório.
 
-BASIC, size, creationTime, lastAccessTime, lastModifiedTime, isDirectory, isOther, isRegularFile, isSymbolicLink  DOS readonly, hidden, system,archive, POSIX permissions,group,owner
+File attributes: BASIC, size, creationTime, lastAccessTime, lastModifiedTime, isDirectory, isOther, isRegularFile, isSymbolicLink  DOS readonly, hidden, system,archive, POSIX permissions,group,owner
 
 path.resolveSibling(String) cria um path com o valor da String no mesmo diretório de path
 
@@ -71,7 +83,7 @@ Files.setAttribute(path, "dos:hidden", true);
 
 Para copy() e move() o comportamento padrão é jogar uma exceção se o Path(arquivo ou diretório) target já existir.
 
-BufferedWriter br = Files.newBufferedWriter(myPath, Charset.forName("UTF-8"), new OpenOption[]{StandardOpenOption.APPEND, StandardOpenOption.DSYNC}); ASYNC = File content e metadata síncronizados DSYNC = File content síncronizado e metadata dessincronizado
+BufferedWriter br = Files.newBufferedWriter(myPath, Charset.forName("UTF-8"), new OpenOption[]{StandardOpenOption.APPEND, StandardOpenOption.DSYNC}); SYNC = File content e metadata síncronizados DSYNC = File content síncronizado e metadata dessincronizado
 
 Files.newBufferedWriter StandardOpenOption.READ = java.lang.IllegalArgumentException: READ not allowed
 
@@ -80,6 +92,8 @@ D in DSYNC is for data
 READ and TRUNCATE_EXISTING (or WRITE, APPEND, or DELETE_ON_CLOSE, CREATE, CREATE_NEW, SYNC, DSYNC) cannot go together.
 
 RandomAccessFile(File/String file, String mode) throws FileNotFoundException, modes r, rw, rws(SYNC), rwd(DSYNC)
+
+FileInputStream, FileOutputStream, and RandomAccessFile do have a getChannel()
 
 =============== Class Design ===============
 
@@ -97,7 +111,7 @@ If the equals() method returns true, then hashCode() for both the objects must r
 
 em uma classe que não sobreescreve hashCode()(comportamento padrão) dois objetos que são ==(mesmo objeto) retornam o mesmo hashCode()
 
-instanceof não compila se os tipos de não forem compativeis
+instanceof não compila se os tipos de não forem compativeis, relacionados por herança
 
 quando o catch e o finally jogam excecao em um try normal a excecao jogada é a do finally a do catch é ignorada
 
@@ -122,7 +136,7 @@ Automatic variable = method local, inner class dentro de método static também 
 
 volatile não é um lock, é só uma instrução para que threads não guardem o valor da váriavel em cache, e sempre leiam da memória RAM.
 
-java [ -enableassertions | -ea ] [:<package name>"..." | :<class name> ] With no arguments, the switch enables assertions by default. With one argument ending in "...", assertions are enabled in the specified package and any subpackages by default. If the argument is simply "...", assertions are enabled in the unnamed package in the current working directory. With one argument not ending in "...", assertions are enabled in the specified class
+java [ -enableassertions | -ea ] [:<package name>... | :<class name> ] With no arguments, the switch enables assertions by default. With one argument ending in "...", assertions are enabled in the specified package and any subpackages by default. If the argument is simply "...", assertions are enabled in the unnamed package in the current working directory. With one argument not ending in "...", assertions are enabled in the specified class
 
 Non-static inner classes não podem ter membros static, só se forem primitivos e final.
 
@@ -130,12 +144,10 @@ When a programmer does not define ANY constructor, the compiler inserts one auto
 
 constructors and initializers are not invoked during deserialization
 
-Evaluation always left to right
-
-FileInputStream, FileOutputStream, and RandomAccessFile do have a getChannel()
-
 Uma classe Serializable com superclasses não Serializable pode ser serializada só que as variaveis os inicializadores e construtores das superclasses
 serão chamados(elas são serão serializadas) e se alguma das superclasses não possuir um construtor sem  argumentos a desserialização falha.
+
+Evaluation always left to right
 
 An enum cannot be defined inside any method or constructor.
 
